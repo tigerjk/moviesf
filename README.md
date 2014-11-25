@@ -21,3 +21,4 @@ Author: Jun Lee
 Email: jklee85@gmail.com
 LinkedIn: ca.linkedin.com/in/junleeto
 Hosted on: Heroku http://sheltered-coast-3497.herokuapp.com/movies
+Github Repo: https://github.com/tigerjk/moviesf
