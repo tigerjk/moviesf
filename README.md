@@ -20,4 +20,4 @@ Contact
 Author: Jun Lee
 Email: jklee85@gmail.com
 LinkedIn: ca.linkedin.com/in/junleeto
-Hosted on: Heroku
+Hosted on: Heroku http://sheltered-coast-3497.herokuapp.com/movies
