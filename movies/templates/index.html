@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all"/>
+<style type="text/css"> 
+	html { height: 30%; } 
+ 	body { height: 30%; margin: 0;}
+	#map_canvas { height: 400px; width: 50%; padding-left: 300px;}
+	#movie_table { height: 50px; width: 100%; }
+</style>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_4XS0VIJH38VRfwLeJsL_X-lOubLmgYI"></script>
+<script type="text/javascript">
+var map;
+function initialize() {
+	var mapOptions = {
+		center: { lat: 37.775, lng: -122.439 },
+		zoom: 12 
+	};
+	map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+	
+	{% if addresses %}	
+	var places = {{ addresses|safe }};
+	var infoWindow = new google.maps.InfoWindow();
+	$.each(places, function (i, place){
+		$.getJSON('http://maps.googleapis.com/maps/api/geocode/json?address='+place['address'] + ' San Francisco&sensor=false', null, function (data) {
+		if (data != null && data.results != null && data.results.length > 0)
+		{
+			var p = data.results[0].geometry.location;
+			var latlng = new google.maps.LatLng(p.lat, p.lng);
+			marker = new google.maps.Marker({
+				position: latlng,
+				map: map
+			});
+			var contentstring = '<div><h3>' + place['address'] + '</h3><li>Title: ' + place['title'] + '</li><li>Director: ' + place['director'] + '</li><li>Release Year: ' + place['release_year'] + '</div>';
+			google.maps.event.addListener(marker, 'click', (function(marker, i) {
+				return function() {
+					infoWindow.setContent(contentstring);
+					infoWindow.open(map, marker);
+				}
+			})(marker, i));
+		}
+	});
+	});
+	{% endif %}	
+}
+	google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+<script type="text/javascript">
+$(function() {
+	$('#search').autocomplete({
+		source: "search/",
+		minLength: 2,
+	});
+});
+
+</script>
+</head>
+<body>
+<h1>Film Locations in San Francisco</h1>
+<div id="searchbox">
+<label> Search: </label>
+{% if query_string %}
+<label id="searchresult">{{query_string}}</label>
+{% endif %}
+<form id="search_form" action="./find" method="POST">
+{% csrf_token %}
+<input type="search" id="search" name="term" placeholder="Title, Locations, Director, Actor" size="40">
+<input type="submit" value="Find"/>
+</form>
+</div>
+<div id="map_canvas"></div>
+<div id="table">
+{% if data %}
+<table id="movie_table" border="1">
+<tbody>
+	<tr>
+		<td>Release Year</td>
+		<td>Title</td>
+		<td>Locations</td>
+		<td>Director</td>
+		<td>Writer(s)</td>
+		<td>Actor 1</td>
+		<td>Actor 2</td>
+		<td>Actor 3</td>
+		<td>Distributor</td>
+		<td>Fun Facts</td>
+		<td>Production Company</td>
+	</tr>
+		{% for movie in data %}
+		<tr>
+			<td>{{ movie.release_year }}</td>
+			<td>{{ movie.title }}</td>
+			<td>{{ movie.locations }}</td>
+			<td>{{ movie.director }}</td>
+			<td>{{ movie.writer }}</td>
+			<td>{{ movie.actor_1 }}</td>
+			<td>{{ movie.actor_2 }}</td>
+			<td>{{ movie.actor_3}}</td>
+			<td>{{ movie.distributor }}</td>
+			<td>{{ movie.fun_facts}}</td>
+			<td>{{ movie.production_company}}</td>
+		</tr>
+		{% endfor %}
+</tbody>
+</table>
+	{% endif %}
+</div>	
+</body>
+</html>
